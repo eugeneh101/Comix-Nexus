@@ -67,6 +67,14 @@ def recommender_input():
         </form>
     '''
 
+@app.route('/all-comics')
+def show_all():
+    return render_template('all_comics.html', all_comic_pics = links)
+
+"""
+<button type='button' class='btn btn-lg btn-danger' onclick="window.location='/openfire'; return false;">Open Fire!</button> 
+"""
+
 @app.route('/recommender-output', methods=['GET', 'POST'])
 def recommender_output():
 #    text = str(request.form['user_input'])
