@@ -31,6 +31,14 @@ def recommender(input_string, tfidfed_matrix, links):
 """
 
 
+def title_cleaner(lst_o_titles):
+    def punctuation_cleaner(title):
+        return ''.join([c if c not in [':'] else "" for c in title])
+        # remove colon from comic book titles
+    comics = [comic.split('/')[-1] for comic in lst_o_titles]
+    comics = [punctuation_cleaner(comic) + '.jpg' for comic in comics]
+    return comics
+
 @app.route('/')
 def submission_page():
     return '''
@@ -69,7 +77,7 @@ def recommender_input():
 
 @app.route('/all-comics')
 def show_all():
-    return render_template('all_comics.html', all_comic_pics = links)
+    return render_template('all_comics.html', all_comic_pics=title_cleaner(links))
 
 """
 <button type='button' class='btn btn-lg btn-danger' onclick="window.location='/openfire'; return false;">Open Fire!</button> 

@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<body>
+	<h1 style=”color:red”>Welcome!</h1>
+	<p> All pics </p>
+	<h2 style=”background-color:blue”>Your Recommendation</h2>
+	{% for image_name in all_comic_pics %}
+ 		<img src = {{ url_for('static', filename = image_name ) }} width=200 height=400>
+ 		<br>
+	{% endfor %}
+
+</body>
+</html>
