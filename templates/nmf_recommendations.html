@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<body>
+	<h1 style=”color:red”>NMF</h1>
+	<p> You selected: {{comic_title}} </p>
+	<h2 style=”background-color:blue”>Your Recommendation NMF1</h2>
+	<p> {{ recommend1 }} </p>
+	<img src = {{ url_for('static', filename = pic1 ) }} width=200 height=400 >
+	<h2 style=”background-color:blue”>Your Recommendation NMF2</h2>
+	<p> {{recommend2}} </p>
+	<img src = {{ url_for('static', filename=pic2 ) }} width=200 height=400 >
+
+</body>
+</html>

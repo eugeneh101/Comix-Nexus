@@ -1,4 +1,5 @@
-from recommendation_models import *
+import os.path
+from recommendation_engines import *
 from flask import Flask, session, redirect, url_for, escape, request, render_template
 import time
 
@@ -31,13 +32,6 @@ def recommender(input_string, tfidfed_matrix, links):
 """
 
 
-def title_cleaner(lst_o_titles):
-    def punctuation_cleaner(title):
-        return ''.join([c if c not in [':'] else "" for c in title])
-        # remove colon from comic book titles
-    comics = [comic.split('/')[-1] for comic in lst_o_titles]
-    comics = [punctuation_cleaner(comic) + '.jpg' for comic in comics]
-    return comics
 
 @app.route('/')
 def submission_page():
@@ -75,13 +69,6 @@ def recommender_input():
         </form>
     '''
 
-@app.route('/all-comics')
-def show_all():
-    return render_template('all_comics.html', all_comic_pics=title_cleaner(links))
-
-"""
-<button type='button' class='btn btn-lg btn-danger' onclick="window.location='/openfire'; return false;">Open Fire!</button> 
-"""
 
 @app.route('/recommender-output', methods=['GET', 'POST'])
 def recommender_output():
@@ -95,27 +82,55 @@ def recommender_output():
     return str(recommend)
 
 
+@app.route('/nmf')
+def show_all():
+    return render_template('nmf.html', all_comic_pics=title_to_jpg(links))
 
 
+@app.route('/nmf/<comic_title>')
+def show_user_profile(comic_title):
+    # show the user profile for that user
+    #return 'User {{username}}'
 
+    comic = [link for link in title_cleaner(links) if link == comic_title][0]
 
-
-
+    """
+    nmf1 = nmf_recommender_1(comic, H_sklearn, links, tfidf_vectorizer, 
+        tfidfed_matrix, W_sklearn)
+    img_name1 = title_cleaner([nmf2])[0] + '.jpg'
+    """
+    nmf2 = nmf_recommender_2(comic, H_sklearn, links, tfidf_vectorizer, 
+        tfidfed_matrix, W_sklearn)
+    img_name2 = title_cleaner([nmf2])[0] + '.jpg'
+    return render_template('nmf_recommendations.html', comic_title=comic_title, 
+        recommend2=nmf2, pic2=img_name2)
 
 
     """
-    X = vectorizer.transform(np.array([text]))
-    prediction = model.predict(X)
-    word_counts = Counter(text.lower().split())
-    page = 'There are {0} words.<br><br> And Your topic is most likely {1}\
-    <br><br> Individual word counts:<br> {2}'
+    nmf2 = nmf_recommender_2(comic, H_sklearn, links, tfidf_vectorizer, 
+        tfidfed_matrix, W_sklearn)
+    img_name2 = title_cleaner([nmf2])[0] + '.jpg'
+    return render_template('nmf_recommendations.html', comic_title=comic_title, recommend1=nmf1, 
+        pic1=img_name1, recommend2=nmf2, pic2=img_name2)
     """
+
+
+
+
+
 
 # set the secret key.  keep this really secret:
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 
 if __name__ == '__main__':
+    # checks to see if you have web scrapped previously
+    if not os.path.isfile('links.pkl'):
+        from tfidf_corpus import *
+
+    # create our TF-IDF variables
     links, tfidf_vectorizer, tfidfed_matrix = load_data()
+
+    
     kmeans = make_kclusters(tfidf_vectorizer, tfidfed_matrix)
     print_kclusters(kmeans, links)
     cos_sim_rc2c(links, tfidfed_matrix)
@@ -127,3 +142,46 @@ if __name__ == '__main__':
 
 
     app.run(host='0.0.0.0', port=8080, debug=True)
+
+
+
+
+
+"""
+cos_sim_recommender(raw_input('type what you want> '), tfidf_vectorizer, tfidfed_matrix, links)
+bob fighting stone my patience is stone and my will is of the stars
+#> 'All-Star_Superman'
+
+draw_dendrogram(links, tfidfed_matrix)
+
+good_comic = raw_input('What comic do you want a similar one? ')
+Wanted_(comics)
+bad_comics = raw_input('Comics you hate? Separate by commas ').split(',')
+Watchmen, The_Dark_Knight_Returns, Kingdom_Come_(comics)
+bad_comics = [comic.strip() for comic in bad_comics]
+cos_sim_c2c(links, tfidfed_matrix, good_comic, bad_comics)
+#> ['All-Star_Superman', 'The_Authority', 'The_Sandman_(Vertigo)']
+
+nmf_recommender_1(raw_input('type what you want> '), H_sklearn, links, tfidf_vectorizer, tfidfed_matrix, W_sklearn)
+bob fighting stone my patience is stone and my will is of the stars
+#> 'Wanted_(comics)'
+
+nmf_recommender_2(raw_input('type in for nmf recommendation> '), H_sklearn, 
+    links, tfidf_vectorizer, tfidfed_matrix, W_sklearn)
+bob fighting stone my patience is stone and my will is of the stars
+#> 'Wanted_(comics)'
+
+
+from recommendation_models import *
+links, tfidf_vectorizer, tfidfed_matrix = load_data()
+kmeans = make_kclusters(tfidf_vectorizer, tfidfed_matrix)
+print_kclusters(kmeans, links)
+cos_sim_rc2c(links, tfidfed_matrix)
+nmf = NMF(n_components=10)
+W_sklearn = nmf.fit_transform(tfidfed_matrix)
+H_sklearn = nmf.components_
+describe_nmf_results(tfidfed_matrix, H_sklearn, W_sklearn, tfidf_vectorizer)
+print_nmf_clusters(H_sklearn, links, W_sklearn)
+
+
+"""
