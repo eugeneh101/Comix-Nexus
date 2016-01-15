@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<body>
+	<h1 style=”color:red”>Welcome!</h1>
+	<p> All pics </p>
+	<h2 style=”background-color:blue”>Pick Your Favorite Comic!</h2>
+	{% for comic_name in all_comics %}
+		<a href= {{'http://localhost:8080/c2c/' + comic_name }} >
+	<!-- <a href= {{'localhost:8080/nmf/' + comic_name.strip('.jpg')}} target="_blank"> -->
+			<img src = {{ url_for('static', filename=comic_name + '.jpg') }} 
+			width=200 height=400>
+		</a>
+	{% endfor %}
+
+</body>
+</html>

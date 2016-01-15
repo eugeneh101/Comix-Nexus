@@ -6,33 +6,6 @@ import time
 
 app = Flask(__name__)
 
-"""
-
-def dict_to_html(d):
-    return '<br>'.join('{0}: {1}'.format(k, d[k]) for k in sorted(d))
-
-def recommender(input_string, tfidfed_matrix, links):
-    stop = set(stopwords.words('english'))
-    stop.update(punctuation)
-
-    user_input = word_tokenize(input_string)
-    snowball = SnowballStemmer('english')
-    user_snowball = [snowball.stem(word) for word in user_input if word not in stop]
-    # remove useless words
-    #lowercase words, keeps only root of words
-    user = [str(' '.join(user_snowball))]
-    # converts list of words into string
-    recommend = cosine_similarity(tfidf_vectorizer.transform(user).todense(), tfidfed_matrix.todense())
-    # x-axis is the original data, y-axis is the query (raw_input) you put in
-    # docs must be list of strings
-    title_index = np.argmax(recommend)
-    # find max similarity
-    return links[title_index].split('/')[-1]
-    # recommendation!
-"""
-
-
-
 @app.route('/')
 def submission_page():
     return '''
@@ -78,32 +51,55 @@ def recommender_output():
     image_name = recommend + '.jpg'
 #    return ''' <img src = /static/ ''' + image_name + ''' >'''
 
-    return render_template('results.html', picture=image_name, input_text=str(session['input_string']))
-    return str(recommend)
+    return render_template('results.html', picture=image_name, 
+        input_text=str(session['input_string']))
 
 
-@app.route('/nmf')
+"""
+@app.route('/c2c')
 def show_all():
-    return render_template('nmf.html', all_comic_pics=title_to_jpg(links))
+    return render_template('comic_2_comic_recommender.html', all_comic_pics=title_to_jpg(links))
 
 
-@app.route('/nmf/<comic_title>')
+@app.route('/c2c/<comic_title>')
 def show_user_profile(comic_title):
     # show the user profile for that user
     #return 'User {{username}}'
 
     comic = [link for link in title_cleaner(links) if link == comic_title][0]
 
-    """
+
     nmf1 = nmf_recommender_1(comic, H_sklearn, links, tfidf_vectorizer, 
         tfidfed_matrix, W_sklearn)
     img_name1 = title_cleaner([nmf2])[0] + '.jpg'
-    """
     nmf2 = nmf_recommender_2(comic, H_sklearn, links, tfidf_vectorizer, 
         tfidfed_matrix, W_sklearn)
     img_name2 = title_cleaner([nmf2])[0] + '.jpg'
-    return render_template('nmf_recommendations.html', comic_title=comic_title, 
+    return render_template('comic_2_recommendations.html', comic_title=comic_title, 
         recommend2=nmf2, pic2=img_name2)
+
+"""
+
+
+@app.route('/c2c')
+def show_all():
+    return render_template('comic_2_comic_recommender.html', all_comics=
+        title_cleaner(links))
+
+
+@app.route('/c2c/<comic_title>')
+def comic_2_comic_recommendations(comic_title):
+    comic = title_to_link(comic_title, links)
+    cos = cos_sim_c2c(links, tfidfed_matrix, comic, rejected_comics=[], 
+        how_many=3)
+    cos_recommendations = title_cleaner(cos)
+
+    nmf = nmf_c2c_in(comic, links, W_sklearn, how_many=3, rejected_comics=[])
+    nmf_recommendations = title_cleaner(nmf)
+
+    return render_template('comic_2_comic_recommendations.html', comic_title=
+        comic_title, cos_recommendations=cos_recommendations,  
+        nmf_recommendations=nmf_recommendations)
 
 
     """

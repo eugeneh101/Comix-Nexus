@@ -1,5 +1,3 @@
-import cPickle as pickle
-# import same as before
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem.snowball import SnowballStemmer
@@ -7,6 +5,7 @@ from string import punctuation
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
+import cPickle as pickle
 from sklearn.cluster import KMeans
 from scipy.spatial.distance import pdist, squareform
 from scipy.cluster.hierarchy import linkage, dendrogram
@@ -14,7 +13,6 @@ import matplotlib.pyplot as plt
 import random
 from sklearn.decomposition import NMF
 
-# load the data
 def load_data():
 	with open('links.pkl') as f:
 	    links = pickle.load(f)
@@ -23,25 +21,6 @@ def load_data():
 	with open('matrix.pkl') as f:
 	    tfidfed_matrix = pickle.load(f)
 	return links, tfidf_vectorizer, tfidfed_matrix
-
-
-def title_cleaner(lst_o_titles):
-    def punctuation_cleaner(title):
-        return ''.join([c if c not in [':'] else "" for c in title])
-        # remove colon from comic book titles
-    comics = [comic.split('/')[-1] for comic in lst_o_titles]
-    return [punctuation_cleaner(comic) for comic in comics]
-
-"""
-def title_to_jpg(lst_o_titles):
-    comics = title_cleaner(lst_o_titles)
-    return  [comic + '.jpg' for comic in comics]
-"""
-
-def title_to_link(one_title, links):
-    link = [link for link in links if title_cleaner([link])[0] == one_title]
-    return link[0].split('/')[-1]
-
 
 def string_cleaner(input_string):
     """Tokenizes input string annd outputs a list of 1 string
@@ -72,7 +51,6 @@ def cos_sim_recommender(input_string, tfidf_vectorizer, tfidfed_matrix, links):
     return links[title_index].split('/')[-1]
     # recommendation!
 
-
 def make_kclusters(tfidf_vectorizer, tfidfed_matrix, n_clusters = 8):
     """Apply k-means clustering to the articles
     """
@@ -92,10 +70,8 @@ def make_kclusters(tfidf_vectorizer, tfidfed_matrix, n_clusters = 8):
         print "%d: %s" % (num, ", ".join(features[i] for i in centroid))
     return kmeans
 
-
 def print_kclusters(kmeans, links):
-    """
-    Print KMean Clusters
+    """Print KMean Clusters
     """
     titles = np.array([link.split('/')[-1] for link in links])
     for index_num, label in enumerate(set(kmeans.labels_)): 
@@ -106,6 +82,8 @@ def print_kclusters(kmeans, links):
             print titles[index]
         print ""
 
+
+
 def draw_dendrogram(links, tfidf_matrix):
     """Hierarchical clustering plot
     """
@@ -115,6 +93,7 @@ def draw_dendrogram(links, tfidf_matrix):
     dendro = dendrogram(link, color_threshold=1.5, leaf_font_size=9, labels=
                     [link.split('/')[-1] for link in links], leaf_rotation=90)
     plt.show()
+    
 
 
 def cos_sim_c2c(links, tfidfed_matrix, input_string, rejected_comics=[], 
@@ -152,9 +131,6 @@ def cos_sim_rc2c(links, tfidfed_matrix):
         '', how_many = 3))   
 
 
-
-
-
 # Non-negative Matrix Facttorization
 def reconst_mse(target, left, right):
     return (np.array(target - left.dot(right))**2).mean()
@@ -182,7 +158,6 @@ def print_nmf_clusters(H_sklearn, links, W_sklearn):
                 print titles[ith]
         print ""
 
-
 def word_to_index_in_vectorizer(lst_o_words, tfidf_vectorizer):
     """Convert a list of words into a list of word indices from vectorizer
     """ 
@@ -193,7 +168,6 @@ def word_to_index_in_vectorizer(lst_o_words, tfidf_vectorizer):
         except:
             continue
     return word_indices
-
 
 def nmf_recommender_1(input_string, H_sklearn, links, tfidf_vectorizer, 
 	tfidfed_matrix, W_sklearn):
@@ -216,8 +190,7 @@ def nmf_recommender_1(input_string, H_sklearn, links, tfidf_vectorizer,
     # look at the average topics generated from words and perform cosine
     # similarity to recommend the closest comic book
     return np.array([link.split('/')[-1] for link in links])[guess]
-
-
+    
 def nmf_recommender_2(input_string, H_sklearn, links, tfidf_vectorizer, 
 	tfidfed_matrix, W_sklearn):
     user = string_cleaner(input_string)
@@ -245,49 +218,45 @@ def nmf_recommender_2(input_string, H_sklearn, links, tfidf_vectorizer,
 
 
 
-# creates array where it shows each row is each comics sorted topics in descreasing importance
-def get_sorted_topics_matrix(W_sklearn):
-    order_topics_for_comics = []
-    for comic in range(len(W_sklearn)):
-        topics_for_comic = list(W_sklearn[comic].copy().argsort()[::-1])
-        order_topics_for_comics.append(topics_for_comic)
-    return np.array(order_topics_for_comics)
 
-def get_similar_comics_nmf(W_sklearn, which_comic):
-    order_topics_for_comics = get_sorted_topics_matrix(W_sklearn)
-    this_comic_topics_index = list(W_sklearn[which_comic].copy().argsort()[::-1])
-    # sorted importance for this comic
-    possible_options = [np.array(range(len(order_topics_for_comics)))]
-    # generates which comics are similar by FP growth
-    for i, topic_index in enumerate(this_comic_topics_index):
-        where = np.where(order_topics_for_comics[possible_options[-1]][:, i] == topic_index)
-        possible_options.append(possible_options[-1][where[0]])
-        if len(possible_options) == 2:
-            return list(possible_options[-1])
-        elif len(possible_options) == 1:
-            return list(possible_options[-2])
+if __name__ == "__main__":
+	pass
 
-# inside cluster nmf comic to comic recommender
-def nmf_c2c_in(input_string, links, W_sklearn, how_many = 3, 
-    rejected_comics = []):
-    titles = np.array([link.split('/')[-1] for link in links])
-    try:
-        which_comic = np.where(titles == input_string)[0][0]
-    except:
-        return 'Your preferred comic title is not in this database'
+"""
+cos_sim_recommender(raw_input('type what you want> '), tfidf_vectorizer, tfidfed_matrix, links)
+bob fighting stone my patience is stone and my will is of the stars
+#> 'All-Star_Superman'
 
-    recommendations = [x for x in get_similar_comics_nmf(W_sklearn, which_comic) if x != which_comic]
-    #recommendations = get_comic_index(W_sklearn, which_comic, float('inf'))
-    comic_recommendations = titles[np.array(recommendations)]
-    np.random.shuffle(comic_recommendations)
-    print comic_recommendations
-        
-    best_n_comics = []
-    for comic in comic_recommendations:
-        if comic in rejected_comics:
-            continue
-        else:
-            best_n_comics.append(comic)
-        if len(best_n_comics) == how_many:
-            return best_n_comics
-    return best_n_comics
+draw_dendrogram(links, tfidfed_matrix)
+
+good_comic = raw_input('What comic do you want a similar one? ')
+Wanted_(comics)
+bad_comics = raw_input('Comics you hate? Separate by commas ').split(',')
+Watchmen, The_Dark_Knight_Returns, Kingdom_Come_(comics)
+bad_comics = [comic.strip() for comic in bad_comics]
+cos_sim_c2c(links, tfidfed_matrix, good_comic, bad_comics)
+#> ['All-Star_Superman', 'The_Authority', 'The_Sandman_(Vertigo)']
+
+nmf_recommender_1(raw_input('type what you want> '), H_sklearn, links, tfidf_vectorizer, tfidfed_matrix, W_sklearn)
+bob fighting stone my patience is stone and my will is of the stars
+#> 'Wanted_(comics)'
+
+nmf_recommender_2(raw_input('type in for nmf recommendation> '), H_sklearn, 
+	links, tfidf_vectorizer, tfidfed_matrix, W_sklearn)
+bob fighting stone my patience is stone and my will is of the stars
+#> 'Wanted_(comics)'
+
+
+from recommendation_models import *
+links, tfidf_vectorizer, tfidfed_matrix = load_data()
+kmeans = make_kclusters(tfidf_vectorizer, tfidfed_matrix)
+print_kclusters(kmeans, links)
+cos_sim_rc2c(links, tfidfed_matrix)
+nmf = NMF(n_components=10)
+W_sklearn = nmf.fit_transform(tfidfed_matrix)
+H_sklearn = nmf.components_
+describe_nmf_results(tfidfed_matrix, H_sklearn, W_sklearn, tfidf_vectorizer)
+print_nmf_clusters(H_sklearn, links, W_sklearn)
+
+
+"""

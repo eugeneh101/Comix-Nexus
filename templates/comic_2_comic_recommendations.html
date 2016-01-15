@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<body>
+	<h1 style=”color:red”>Comic to comic recommendations!</h1>
+	<p> You selected: {{comic_title}} </p>
+<!-- 	<button type='button' class='btn btn-lg btn-danger' onclick="window.location='/openfire'; return false;">Open Fire!</button> -->
+
+<!-- Stick wikipedia page here -->
+
+	<h2 style=”background-color:blue”>Your Recommendation Cosine Similarity</h2>
+	{% for image_name in cos_recommendations %}
+<!-- 		<p> {{ nmf_recommendations[loop.index0] }}  </p>-->
+		<a href= {{'http://localhost:8080/c2c/' + image_name }} >
+			<img src = {{ url_for('static', filename=image_name + '.jpg') }} 
+			width=200 height=400>
+		</a>
+	{% endfor %}
+	<h2 style=”background-color:blue”>Your Recommendation NMF</h2>
+	{% for image_name in nmf_recommendations %}
+		<a href= {{'http://localhost:8080/c2c/' + image_name}} >
+			<img src = {{ url_for('static', filename=image_name + '.jpg') }} 
+			width=200 height=400>
+		</a>
+	{% endfor %}
+</body>
+</html>
+
+
+
+
+
