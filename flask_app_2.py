@@ -19,7 +19,6 @@ def submission_page():
 def login():
     if request.method == 'POST':
         session['username'] = request.form['user_input']
-
         return redirect(url_for('recommender_input'))
     return '''
         <form action="" method="post">
@@ -36,8 +35,10 @@ def recommender_input():
         return redirect(url_for('recommender_output'))
     return '''
         <form action="" method="post">
-            <p>Type your idea of a good comic book: <br>
-            <input type=text name=input_string><br>
+            <p>Type your idea of a good comic book: 
+            <br>
+            <input type=text name=input_string>
+            <br>
             <input type=submit value=Enter_Now></p>
         </form>
     '''
@@ -45,40 +46,24 @@ def recommender_input():
 
 @app.route('/recommender-output', methods=['GET', 'POST'])
 def recommender_output():
-#    text = str(request.form['user_input'])
-    recommend = cos_sim_recommender(str(session['input_string']), 
-        tfidf_vectorizer, tfidfed_matrix, links)
-    image_name = recommend + '.jpg'
+    text = session['input_string']
+
+    cos_recommendation = cos_sim_recommender(text, tfidf_vectorizer,
+        tfidfed_matrix, links)
+    cos_recommendation = title_cleaner([cos_recommendation])[0]
+
+    nmf1 = nmf_recommender_1(text, H_sklearn, links, tfidf_vectorizer, 
+        tfidfed_matrix, W_sklearn)
+    nmf1_recommendation = title_cleaner([nmf1])[0]
+    nmf2 = nmf_recommender_2(text, H_sklearn, links, tfidf_vectorizer, 
+        tfidfed_matrix, W_sklearn)
+    nmf2_recommendation = title_cleaner([nmf2])[0]
+    return render_template('comic_recommendations.html', input_text=
+        str(session['input_string']), cos_recommendation=cos_recommendation,
+        nmf1_recommendation=nmf1_recommendation, nmf2_recommendation=
+        nmf2_recommendation)
 #    return ''' <img src = /static/ ''' + image_name + ''' >'''
 
-    return render_template('results.html', picture=image_name, 
-        input_text=str(session['input_string']))
-
-
-"""
-@app.route('/c2c')
-def show_all():
-    return render_template('comic_2_comic_recommender.html', all_comic_pics=title_to_jpg(links))
-
-
-@app.route('/c2c/<comic_title>')
-def show_user_profile(comic_title):
-    # show the user profile for that user
-    #return 'User {{username}}'
-
-    comic = [link for link in title_cleaner(links) if link == comic_title][0]
-
-
-    nmf1 = nmf_recommender_1(comic, H_sklearn, links, tfidf_vectorizer, 
-        tfidfed_matrix, W_sklearn)
-    img_name1 = title_cleaner([nmf2])[0] + '.jpg'
-    nmf2 = nmf_recommender_2(comic, H_sklearn, links, tfidf_vectorizer, 
-        tfidfed_matrix, W_sklearn)
-    img_name2 = title_cleaner([nmf2])[0] + '.jpg'
-    return render_template('comic_2_recommendations.html', comic_title=comic_title, 
-        recommend2=nmf2, pic2=img_name2)
-
-"""
 
 
 @app.route('/c2c')
@@ -101,16 +86,50 @@ def comic_2_comic_recommendations(comic_title):
         comic_title, cos_recommendations=cos_recommendations,  
         nmf_recommendations=nmf_recommendations)
 
+"""
+@app.route('/random', methods=['GET', 'POST'])
+def random():
+    def show_page():
+        cos_comic, cos_similar_comics = cos_sim_rc2c(links, tfidfed_matrix)
+        nmf_comic, nmf_similar_comics = nmf_sim_rc2c(links, tfidfed_matrix, 
+            W_sklearn)
+        return '''
+            <h1 style="color:red">Random Comics!</h1>
+            <form action="" method="post">
+                <p> Some More Random Comics? 
+                <br>
+                <input type=submit value=Yes></p>
+                <input type=submit value="No?"></p>
+            </form>
+            <p> Cosine Similarity Random Comic: ''' + cos_comic + ''' </p>
+            <img src = '''"/static/" + title_cleaner([cos_comic])[0] + ".jpg"'''>
 
-    """
-    nmf2 = nmf_recommender_2(comic, H_sklearn, links, tfidf_vectorizer, 
-        tfidfed_matrix, W_sklearn)
-    img_name2 = title_cleaner([nmf2])[0] + '.jpg'
-    return render_template('nmf_recommendations.html', comic_title=comic_title, recommend1=nmf1, 
-        pic1=img_name1, recommend2=nmf2, pic2=img_name2)
-    """
+        '''
+    if request.method == 'POST':
+        return show_page()
+    return show_page()
+"""
+
+@app.route('/random', methods=['GET', 'POST'])
+def random():
+    cos_comic, cos_similar_comics = cos_sim_rc2c(links, tfidfed_matrix)
+    nmf_comic, nmf_similar_comics = nmf_sim_rc2c(links, tfidfed_matrix, 
+        W_sklearn)
+    if request.method == 'POST':
+        return render_template('random.html', 
+            cos_comic=title_cleaner([cos_comic])[0], 
+            cos_similar_comics=title_cleaner(cos_similar_comics),
+            nmf_comic=title_cleaner([nmf_comic])[0],
+            nmf_similar_comics= title_cleaner(nmf_similar_comics))
+    return render_template('random.html', 
+        cos_comic=title_cleaner([cos_comic])[0], 
+        cos_similar_comics=title_cleaner(cos_similar_comics),
+        nmf_comic=title_cleaner([nmf_comic])[0],
+        nmf_similar_comics= title_cleaner(nmf_similar_comics))
 
 
+#    return ''' <img src = /static/ ''' + image_name + ''' >'''
+#    return '''<img src='''"/static/" + title_cleaner([cos_comic])[0] + ".jpg"'''>'''
 
 
 

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<body>
+	<h1 style=”color:red”>Your Recommendation!</h1>
+	<p> You entered: {{input_text}} </p>
+	<h2 style=”background-color:blue”>Cosine Similarity Recommendation</h2>
+	<img src = {{ url_for('static', filename=cos_recommendation + '.jpg') }} 
+	width=200 height=400>
+	<h2 style=”background-color:blue”>NMF Version 1 Recommendation</h2>
+	<img src = {{ url_for('static', filename=nmf1_recommendation + '.jpg') }} 
+	width=200 height=400>
+	<h2 style=”background-color:blue”>NMF Version 2 Recommendation</h2>
+	<img src = {{ url_for('static', filename=nmf2_recommendation + '.jpg') }} 
+	width=200 height=400>
+
+
+<!-- 	<h2 style=”background-color:blue”>Cosine Similarity Recommendation</h2>
+	<img src = {{ url_for('static', filename=picture) }} >
+ -->
+
+</body>
+</html>

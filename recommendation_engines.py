@@ -147,10 +147,8 @@ def cos_sim_rc2c(links, tfidfed_matrix):
     titles = np.array([link.split('/')[-1] for link in links])
     random_comic = random.choice(titles)
     # over_recommended_comics = 'The_Sandman_(Vertigo), Watchmen, Saga_(comic_book)'
-    output = "A random comic: " + random_comic + "; Similar comics: "
-    return output + ', '.join(cos_sim_c2c(links, tfidfed_matrix, random_comic,
-        '', how_many = 3))   
-
+    return random_comic, cos_sim_c2c(links, tfidfed_matrix, random_comic,
+        '', how_many = 3)
 
 
 
@@ -276,7 +274,8 @@ def nmf_c2c_in(input_string, links, W_sklearn, how_many = 3,
     except:
         return 'Your preferred comic title is not in this database'
 
-    recommendations = [x for x in get_similar_comics_nmf(W_sklearn, which_comic) if x != which_comic]
+    recommendations = [x for x in get_similar_comics_nmf(W_sklearn, which_comic)
+        if x != which_comic]
     #recommendations = get_comic_index(W_sklearn, which_comic, float('inf'))
     comic_recommendations = titles[np.array(recommendations)]
     np.random.shuffle(comic_recommendations)
@@ -291,3 +290,10 @@ def nmf_c2c_in(input_string, links, W_sklearn, how_many = 3,
         if len(best_n_comics) == how_many:
             return best_n_comics
     return best_n_comics
+
+
+def nmf_sim_rc2c(links, tfidfed_matrix, W_sklearn):
+    titles = np.array([link.split('/')[-1] for link in links])
+    random_comic = random.choice(titles)
+    return random_comic, nmf_c2c_in(random_comic, links, W_sklearn, how_many = 3, 
+        rejected_comics = [])

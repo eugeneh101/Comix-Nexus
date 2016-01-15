@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h1 style="color:red">Random Comics!</h1>
+    <form action="" method="post">
+        <p> Some More Random Comics? 
+        <br>
+        <input type=submit value=Yes>
+        <input type=submit value="No?"></p>
+    </form>
+    <p> Random Comic: {{ cos_comic }} </p>
+	<img src = {{ url_for('static', filename=cos_comic + '.jpg') }} width=200 
+	height=400>
+    <p> Comics Generated from Cosine Similarity </p>
+	{% for comic in cos_similar_comics %}
+		<img src = {{ url_for('static', filename=comic + '.jpg') }} width=200 
+		height=400>
+	{% endfor %}
+<!--     <p> NMF Random Comic: {{ nmf_comic }} </p>
+	<img src = {{ url_for('static', filename=cos_comic + '.jpg') }} width=200 
+	height=400> -->
+	<p> Comics Generated from NMF </p>
+	{% for comic in nmf_similar_comics %}
+		<img src = {{ url_for('static', filename=comic + '.jpg') }} width=200 
+		height=400>
+	{% endfor %}
+
+
+
+</body>
+</html>
+
+
+
