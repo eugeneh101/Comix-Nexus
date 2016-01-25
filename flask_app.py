@@ -86,29 +86,6 @@ def comic_2_comic_recommendations(comic_title):
         comic_title, cos_recommendations=cos_recommendations,  
         nmf_recommendations=nmf_recommendations)
 
-"""
-@app.route('/random', methods=['GET', 'POST'])
-def random():
-    def show_page():
-        cos_comic, cos_similar_comics = cos_sim_rc2c(links, tfidfed_matrix)
-        nmf_comic, nmf_similar_comics = nmf_sim_rc2c(links, tfidfed_matrix, 
-            W_sklearn)
-        return '''
-            <h1 style="color:red">Random Comics!</h1>
-            <form action="" method="post">
-                <p> Some More Random Comics? 
-                <br>
-                <input type=submit value=Yes></p>
-                <input type=submit value="No?"></p>
-            </form>
-            <p> Cosine Similarity Random Comic: ''' + cos_comic + ''' </p>
-            <img src = '''"/static/" + title_cleaner([cos_comic])[0] + ".jpg"'''>
-
-        '''
-    if request.method == 'POST':
-        return show_page()
-    return show_page()
-"""
 
 @app.route('/random', methods=['GET', 'POST'])
 def random():
@@ -146,9 +123,9 @@ if __name__ == '__main__':
     links, tfidf_vectorizer, tfidfed_matrix = load_data()
 
     
-    kmeans = make_kclusters(tfidf_vectorizer, tfidfed_matrix)
-    print_kclusters(kmeans, links)
-    cos_sim_rc2c(links, tfidfed_matrix)
+#    kmeans = make_kclusters(tfidf_vectorizer, tfidfed_matrix)
+#    print_kclusters(kmeans, links)
+#    cos_sim_rc2c(links, tfidfed_matrix)
     nmf = NMF(n_components=10)
     W_sklearn = nmf.fit_transform(tfidfed_matrix)
     H_sklearn = nmf.components_

@@ -153,7 +153,7 @@ def cos_sim_rc2c(links, tfidfed_matrix):
 
 
 
-# Non-negative Matrix Facttorization
+# Non-negative Matrix Factorization
 def reconst_mse(target, left, right):
     return (np.array(target - left.dot(right))**2).mean()
 
